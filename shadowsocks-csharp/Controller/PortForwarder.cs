@@ -8,6 +8,9 @@ namespace Shadowsocks.Controller
 {
     class PortForwarder : Listener.Service
     {
+        /// <summary>
+        /// polipo监听的端口
+        /// </summary>
         int _targetPort;
 
         public PortForwarder(int targetPort)
@@ -17,6 +20,7 @@ namespace Shadowsocks.Controller
 
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
+            Console.WriteLine("socket {0}->{1} on PortForwarder", socket.LocalEndPoint, socket.RemoteEndPoint);
             new Handler().Start(firstPacket, length, socket, this._targetPort);
             return true;
         }

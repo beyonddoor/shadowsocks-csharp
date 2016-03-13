@@ -69,7 +69,7 @@ namespace Shadowsocks.Controller
 
 
                 // Start an asynchronous socket to listen for connections.
-                Console.WriteLine("Shadowsocks started");
+                Console.WriteLine("Shadowsocks started at {0}", localEndPoint);
                 _socket.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     _socket);
@@ -136,7 +136,6 @@ namespace Shadowsocks.Controller
         private void ReceiveCallback(IAsyncResult ar)
         {
             object[] state = (object[])ar.AsyncState;
-
             Socket conn = (Socket)state[0];
             byte[] buf = (byte[])state[1];
             try
@@ -155,9 +154,15 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
+                LogSocket(conn);
                 Console.WriteLine(e);
                 conn.Close();
             }
+        }
+
+        private void LogSocket(Socket conn)
+        {
+            Console.WriteLine("local:{0} remote:{1}", conn.LocalEndPoint , conn.RemoteEndPoint);
         }
     }
 }

@@ -21,7 +21,6 @@ namespace Shadowsocks.Controller
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
                 Console.SetError(sw);
-                
                 return true;
             }
             catch (IOException e)
@@ -34,9 +33,9 @@ namespace Shadowsocks.Controller
         public static void LogUsefulException(Exception e)
         {
             // just log useful exceptions, not all of them
-            if (e is SocketException)
+            var se = e as SocketException;
+            if (se != null)
             {
-                SocketException se = (SocketException)e;
                 if (se.SocketErrorCode == SocketError.ConnectionAborted)
                 {
                     // closed by browser when sending
@@ -77,12 +76,16 @@ namespace Shadowsocks.Controller
 
         public override void WriteLine(string value)
         {
-            base.WriteLine(GetTimestamp() + value);
+            var msg = GetTimestamp() + value;
+            base.WriteLine(msg);
+            //Console.WriteLine(msg);
         }
 
         public override void Write(string value)
         {
-            base.Write(GetTimestamp() + value);
+            var msg = GetTimestamp() + value;
+            base.Write(msg);
+            //Console.WriteLine(msg);
         }
     }
 

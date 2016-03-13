@@ -19,6 +19,12 @@ namespace Shadowsocks
         static void Main()
         {
             Util.Utils.ReleaseMemory();
+            Process[] proc = Process.GetProcessesByName("ss_polipo");
+            if(proc.Length > 0)
+            {
+                proc[0].Kill();
+            }
+
             using (Mutex mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
             {
                 Application.EnableVisualStyles();

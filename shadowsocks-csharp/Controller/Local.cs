@@ -8,7 +8,9 @@ using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
-
+    /// <summary>
+    /// 把收到的数据转发给远程的ss server
+    /// </summary>
     class Local : Listener.Service
     {
         private Configuration _config;
@@ -29,7 +31,7 @@ namespace Shadowsocks.Controller
             Server server = _config.GetCurrentServer();
             handler.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             handler.server = server;
-
+            Console.WriteLine("socket {0}->{1} on local", socket.LocalEndPoint, socket.RemoteEndPoint);
             handler.Start(firstPacket, length);
             return true;
         }

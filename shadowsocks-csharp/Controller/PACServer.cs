@@ -37,6 +37,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
+                Console.WriteLine("socket {0}->{1} on PacServer", socket.LocalEndPoint, socket.RemoteEndPoint);
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
