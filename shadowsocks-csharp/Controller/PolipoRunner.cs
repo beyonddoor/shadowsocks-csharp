@@ -2,12 +2,14 @@
 using Shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Net.NetworkInformation;
 using System.Net;
+using Configuration = Shadowsocks.Model.Configuration;
 
 namespace Shadowsocks.Controller
 {
@@ -43,6 +45,13 @@ namespace Shadowsocks.Controller
             Server server = configuration.GetCurrentServer();
             if (_process == null)
             {
+                if (Program.Config.standalonePolipo)
+                {
+                    _runningPort = 8123;
+                    Console.WriteLine("use standalone polipo at 8123");
+                    return;
+                }
+
                 Process[] existingPolipo = Process.GetProcessesByName("ss_polipo");
                 foreach (Process p in existingPolipo)
                 {
@@ -63,13 +72,18 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
-                _process = new Process();
+                _process = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = temppath + "/ss_polipo.exe",
+                        Arguments = "-c \"" + temppath + "/polipo.conf\"",
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        UseShellExecute = true,
+                        CreateNoWindow = true
+                    }
+                };
                 // Configure the process using the StartInfo properties.
-                _process.StartInfo.FileName = temppath + "/ss_polipo.exe";
-                _process.StartInfo.Arguments = "-c \"" + temppath + "/polipo.conf\"";
-                _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                _process.StartInfo.UseShellExecute = true;
-                _process.StartInfo.CreateNoWindow = true;
                 //_process.StartInfo.RedirectStandardOutput = true;
                 //_process.StartInfo.RedirectStandardError = true;
                 _process.Start();

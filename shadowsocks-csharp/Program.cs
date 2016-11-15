@@ -3,15 +3,37 @@ using Shadowsocks.Properties;
 using Shadowsocks.View;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using Shadowsocks.Model;
 
 namespace Shadowsocks
 {
     static class Program
     {
+        private static TestConfig _config;
+        private static bool _needSave = false;
+
+        public static TestConfig Config
+        {
+            get
+            {
+                if (_config == null)
+                {
+                    _config = TestConfig.Load(TestConfig.File);
+                    if (_config == null)
+                    {
+                        _config = new TestConfig { killPolipo = false, standalonePolipo = true };
+                        _needSave = true;
+                    }
+                }
+                return _config;
+            }
+        }
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -19,10 +41,15 @@ namespace Shadowsocks
         static void Main()
         {
             Util.Utils.ReleaseMemory();
-            Process[] proc = Process.GetProcessesByName("ss_polipo");
-            if(proc.Length > 0)
+
+
+            if(Config.killPolipo)
             {
-                proc[0].Kill();
+                Process[] proc = Process.GetProcessesByName("ss_polipo");
+                if (proc.Length > 0)
+                {
+                    proc[0].Kill();
+                }
             }
 
             using (Mutex mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
@@ -51,6 +78,8 @@ namespace Shadowsocks
                 controller.Start();
 
                 Application.Run();
+
+                if(_needSave) TestConfig.Save(Config, TestConfig.File);
             }
         }
     }

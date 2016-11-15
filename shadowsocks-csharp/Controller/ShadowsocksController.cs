@@ -20,10 +20,9 @@ namespace Shadowsocks.Controller
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
-        private PolipoRunner polipoRunner;
-        private GFWListUpdater gfwListUpdater;
-        private bool stopped = false;
-
+        private PolipoRunner _polipoRunner;
+        private GFWListUpdater _gfwListUpdater;
+        private bool _stopped = false;
         private bool _systemProxyIsDirty = false;
 
         public class PathEventArgs : EventArgs
@@ -139,18 +138,18 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
-            if (stopped)
+            if (_stopped)
             {
                 return;
             }
-            stopped = true;
+            _stopped = true;
             if (_listener != null)
             {
                 _listener.Stop();
             }
-            if (polipoRunner != null)
+            if (_polipoRunner != null)
             {
-                polipoRunner.Stop();
+                _polipoRunner.Stop();
             }
             if (_config.enabled)
             {
@@ -186,9 +185,9 @@ namespace Shadowsocks.Controller
 
         public void UpdatePACFromGFWList()
         {
-            if (gfwListUpdater != null)
+            if (_gfwListUpdater != null)
             {
-                gfwListUpdater.UpdatePACFromGFWList(_config);
+                _gfwListUpdater.UpdatePACFromGFWList(_config);
             }
         }
 
@@ -219,9 +218,9 @@ namespace Shadowsocks.Controller
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
 
-            if (polipoRunner == null)
+            if (_polipoRunner == null)
             {
-                polipoRunner = new PolipoRunner();
+                _polipoRunner = new PolipoRunner();
             }
             if (_pacServer == null)
             {
@@ -229,11 +228,11 @@ namespace Shadowsocks.Controller
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
             }
             _pacServer.UpdateConfiguration(_config);
-            if (gfwListUpdater == null)
+            if (_gfwListUpdater == null)
             {
-                gfwListUpdater = new GFWListUpdater();
-                gfwListUpdater.UpdateCompleted += pacServer_PACUpdateCompleted;
-                gfwListUpdater.Error += pacServer_PACUpdateError;
+                _gfwListUpdater = new GFWListUpdater();
+                _gfwListUpdater.UpdateCompleted += pacServer_PACUpdateCompleted;
+                _gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
             if (_listener != null)
@@ -245,16 +244,16 @@ namespace Shadowsocks.Controller
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            polipoRunner.Stop();
+            _polipoRunner.Stop();
             try
             {
-                polipoRunner.Start(_config);
+                _polipoRunner.Start(_config);
 
                 Local local = new Local(_config);
                 List<Listener.Service> services = new List<Listener.Service>();
                 services.Add(local);
                 services.Add(_pacServer);
-                services.Add(new PortForwarder(polipoRunner.RunningPort));
+                services.Add(new PortForwarder(_polipoRunner.RunningPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }

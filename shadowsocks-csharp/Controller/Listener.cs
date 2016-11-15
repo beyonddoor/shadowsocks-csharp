@@ -154,15 +154,9 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                LogSocket(conn);
                 Console.WriteLine(e);
                 conn.Close();
             }
-        }
-
-        private void LogSocket(Socket conn)
-        {
-            Console.WriteLine("local:{0} remote:{1}", conn.LocalEndPoint , conn.RemoteEndPoint);
         }
     }
 }
